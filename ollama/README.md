@@ -160,11 +160,11 @@ From Burp evidence, write a full vulnerability report with reproduction, impact 
 
 ## Example models
 
-| Model           | VRAM  | Quality   |
-| --------------- | ----- | --------- |
-| deepseek-r1:14b | 16GB  | Excellent |
-| gpt-oss:20b     | 20GB  | Excellent |
-| llama3.1:70b    | 48GB+ | Very large |
+| Model                 | VRAM  | Notes |
+| --------------------- | ----- | ----- |
+| llama3.1:8b-instruct  | 8GB+  | Small, fast |
+| qwen2.5:14b-instruct  | 16GB  | Mid size |
+| llama3.1:70b-instruct | 48GB+ | Large, high VRAM |
 
 ---
 

@@ -1,6 +1,6 @@
 # Burp MCP Agents
 
-Practical setup guides and helpers to connect Burp Suite MCP Server to multiple AI backends (Codex, Gemini, Ollama).
+Practical setup guides and helpers to connect Burp Suite MCP Server to multiple AI backends (Codex, Gemini, Ollama, LM Studio).
 
 This repo focuses on wiring, safety-first workflows, and reusable prompts to analyze real Burp traffic.
 
@@ -14,7 +14,7 @@ Only real traffic + reasoning.
 
 Burp MCP Agents is a collection of:
 
-• Backend setup guides (Codex, Gemini, Ollama)
+• Backend setup guides (Codex, Gemini, Ollama, LM Studio)
 • Caddy proxy configuration for MCP SSE
 • Prompt templates for passive analysis and reporting
 
@@ -28,9 +28,9 @@ Burp Suite MCP Server
 │
 MCP Bridge
 │
-┌─────────────────────────────┐
-│              │              │
-Codex CLI   Ollama Agent   Gemini CLI
+┌──────────────────────────────────────────────┐
+│              │              │                │
+Codex CLI   Ollama Agent   Gemini CLI   LM Studio Agent
 ```
 
 ---
@@ -42,6 +42,7 @@ Codex CLI   Ollama Agent   Gemini CLI
 | Codex CLI | Cloud | Medium | Easy |
 | Ollama | Local | Full | Advanced |
 | Gemini CLI | Cloud | Medium | Easy |
+| LM Studio | Local | Full | Advanced |
 
 ---
 
@@ -82,11 +83,11 @@ See: `ollama/README.md`
 
 **Example models**
 
-| Model | VRAM | Quality |
-|------|-----|--------|
-| deepseek-r1:14b | 16GB | Excellent |
-| gpt-oss:20b | 20GB | Excellent |
-| llama3.1:70b | 48GB+ | Very large |
+| Model | VRAM | Notes |
+|------|-----|------|
+| llama3.1:8b-instruct | 8GB+ | Small, fast |
+| qwen2.5:14b-instruct | 16GB | Mid size |
+| llama3.1:70b-instruct | 48GB+ | Large, high VRAM |
 
 ---
 
@@ -100,6 +101,20 @@ See: `gemini-cli/README.md`
 |------|-----|
 | gemini-2.0-flash | Fast |
 | gemini-2.0-pro | Deeper reasoning |
+
+---
+
+## LM Studio (local OpenAI-compatible)
+
+See: `lmstudio/README.md`
+
+**Example models**
+
+| Model | Notes |
+|------|-----|
+| llama-3.1-8b-instruct | Small, fast |
+| qwen2.5-14b-instruct | Mid size |
+| llama-3.1-70b-instruct | Large, high VRAM |
 
 ---
 
@@ -133,6 +148,7 @@ Source them directly:
 source /path/to/burp-mcp-agents/codex/burpcodex.sh
 source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
 source /path/to/burp-mcp-agents/ollama/burpollama.sh
+source /path/to/burp-mcp-agents/lmstudio/burplmstudio.sh
 ```
 
 Then run:
@@ -141,6 +157,7 @@ Then run:
 burpcodex
 burpgemini
 burpollama deepseek-r1:14b
+burplmstudio llama-3.1-8b-instruct
 ```
 
 To make these available in every shell, add the `source` lines to your
