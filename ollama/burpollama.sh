@@ -30,7 +30,7 @@ burpollama () {
 	fi
 	if [[ -z "$1" ]]
 	then
-		echo "Usage: burpollama <ollama-model> [--burp <sse-url>]"
+		echo "Usage: burpollama <ollama-model> [--burp <sse-url>] [--timeout <seconds>]"
 		return 1
 	fi
 	cleanup () {

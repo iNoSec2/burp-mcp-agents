@@ -96,6 +96,11 @@ common/caddy_setup.md
 ```bash
 python3 ollama_mcp_agent.py deepseek-r1:14b
 ```
+Optional timeout override (in seconds):
+
+```bash
+python3 ollama_mcp_agent.py deepseek-r1:14b --timeout 120
+```
 
 ## Optional launcher
 
@@ -111,6 +116,12 @@ Then run:
 
 ```bash
 burpollama deepseek-r1:14b
+```
+
+Timeout override (in seconds):
+
+```bash
+burpollama deepseek-r1:14b --timeout 120
 ```
 
 This will:

@@ -117,19 +117,24 @@ async def run_agent(model: str, burp_sse_url: str, lmstudio_url: str, api_key: s
                         args = {"raw": args_raw}
 
                     print(f"[dim]-> calling MCP tool: {name}({args})[/dim]")
-                    result = await session.call_tool(name, arguments=args)
-                    tool_result_payload = {
-                        "tool": name,
-                        "result": [getattr(c, "text", str(c)) for c in result.content],
-                        "structured": getattr(result, "structuredContent", None),
-                    }
+                    try:
+                        result = await session.call_tool(name, arguments=args)
+                        tool_result_payload = {
+                            "tool": name,
+                            "result": [getattr(c, "text", str(c)) for c in result.content],
+                            "structured": getattr(result, "structuredContent", None),
+                        }
+                        content_str = json.dumps(tool_result_payload)
+                    except Exception as exc:
+                        print(f"[red]Tool execution failed:[/red] {exc}")
+                        content_str = json.dumps({"error": str(exc), "status": "failed"})
 
                     messages.append(
                         {
                             "role": "tool",
                             "tool_call_id": call.id,
                             "name": name,
-                            "content": json.dumps(tool_result_payload),
+                            "content": content_str,
                         }
                     )
 

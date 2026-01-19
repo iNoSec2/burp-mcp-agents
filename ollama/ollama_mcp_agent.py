@@ -58,8 +58,9 @@ def mcp_tools_to_ollama_tools(mcp_tools: List[Any]) -> List[Dict[str, Any]]:
     return tools
 
 
-async def run_agent(model: str, burp_sse_url: str) -> None:
+async def run_agent(model: str, burp_sse_url: str, timeout: float | None) -> None:
     ensure_model(model)
+    client = ollama.Client(timeout=timeout) if timeout is not None else ollama.Client()
 
     print(f"[cyan]Connecting to Burp MCP (SSE):[/cyan] {burp_sse_url}")
     try:
@@ -94,7 +95,7 @@ async def run_agent(model: str, burp_sse_url: str) -> None:
                 messages.append({"role": "user", "content": user})
 
                 # Ask the model (with tool definitions)
-                resp = ollama.chat(
+                resp = client.chat(
                     model=model,
                     messages=messages,
                     tools=ollama_tools,
@@ -124,25 +125,28 @@ async def run_agent(model: str, burp_sse_url: str) -> None:
                             args = {"raw": args}
 
                     print(f"[dim]→ calling MCP tool: {name}({args})[/dim]")
-                    result = await session.call_tool(name, arguments=args)
-
-                    # MCP returns content blocks; keep it simple as text/json
-                    tool_result_payload = {
-                        "tool": name,
-                        "result": [getattr(c, "text", str(c)) for c in result.content],
-                        "structured": getattr(result, "structuredContent", None),
-                    }
+                    try:
+                        result = await session.call_tool(name, arguments=args)
+                        tool_result_payload = {
+                            "tool": name,
+                            "result": [getattr(c, "text", str(c)) for c in result.content],
+                            "structured": getattr(result, "structuredContent", None),
+                        }
+                        content_str = json.dumps(tool_result_payload, ensure_ascii=False)
+                    except Exception as exc:
+                        print(f"[red]Tool execution failed:[/red] {exc}")
+                        content_str = json.dumps({"error": str(exc), "status": "failed"}, ensure_ascii=False)
 
                     messages.append(
                         {
                             "role": "tool",
                             "name": name,
-                            "content": json.dumps(tool_result_payload, ensure_ascii=False),
+                            "content": content_str,
                         }
                     )
 
                 # Ask the model again with tool outputs
-                resp2 = ollama.chat(model=model, messages=messages)
+                resp2 = client.chat(model=model, messages=messages)
                 msg2 = resp2.get("message", {})
                 content2 = msg2.get("content", "") or ""
                 print(content2)
@@ -157,9 +161,15 @@ def main() -> None:
     p = argparse.ArgumentParser(description="Ollama + Burp MCP (SSE) agent")
     p.add_argument("model", help="Ollama model name (e.g. gpt-oss:20b, deepseek-r1:14b)")
     p.add_argument("--burp", default=DEFAULT_BURP_SSE_URL, help=f"Burp MCP SSE URL (default: {DEFAULT_BURP_SSE_URL})")
+    p.add_argument(
+        "--timeout",
+        type=float,
+        default=None,
+        help="Ollama request timeout in seconds (default: library default)",
+    )
     args = p.parse_args()
 
-    asyncio.run(run_agent(args.model, args.burp))
+    asyncio.run(run_agent(args.model, args.burp, args.timeout))
 
 
 if __name__ == "__main__":
